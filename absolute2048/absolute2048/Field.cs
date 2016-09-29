@@ -17,7 +17,9 @@ namespace absolute2048
                 for (int j = 0; j < Global.heightY; j++)
                 {
                     cells[i, j] = new Cell(0);
-                }
+					cells[i, j].X = i + 1;
+					cells[i, j].Y = j + 1;
+				}
             }
                 
             respawn();
