@@ -22,12 +22,12 @@ namespace absolute2048
 				}
             }
                 
-            respawn();
+            spawn();
         }
 
-        public void respawn()
+        private void spawn()
         {
-            Random rand = new Random(Guid.NewGuid().GetHashCode());
+			Random rand = new Random(Guid.NewGuid().GetHashCode());
             for (int i = 0; i < Global.spawnValue; i++)
             {
                 int x = 0;
@@ -41,5 +41,52 @@ namespace absolute2048
                 cells[x, y].value = Global.basisValue;
             }
         }
+
+		public void moveUp()
+		{
+			Cell[,] currentCells = cells;
+
+			for (int i = 0; i < Global.heightY; i++)
+			{
+				for (int j = 0; j < Global.widthX; j++)
+				{
+					try
+					{
+						if (cells[j, i].value == cells[j, i + 1].value && cells[j, i].value != 0)
+						{
+							cells[j, i].value += cells[j, i + 1].value;
+							cells[j, i + 1].value = 0;							
+						}
+						if (cells[j, i].value == 0)
+						{
+							for (int k = i; k < Global.heightY; k++)
+							{
+								cells[j, k].value += cells[j, k + 1].value;
+								cells[j, k + 1].value = 0;
+							}
+						}
+					}
+					catch (System.IndexOutOfRangeException) {; }
+				}
+			}
+
+			//if (currentCells != cells)
+				spawn();
+		}
+
+		public void moveDown()
+		{
+
+		}
+
+		public void moveLeft()
+		{
+
+		}
+
+		public void moveRight()
+		{
+
+		}
     }
 }

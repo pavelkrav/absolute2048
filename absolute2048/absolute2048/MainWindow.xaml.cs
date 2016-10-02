@@ -17,7 +17,9 @@ namespace absolute2048
 {
     public partial class MainWindow : Window
     {
-        public MainWindow()
+		private Field currentField;
+
+		public MainWindow()
         {
             InitializeComponent();
         }
@@ -40,27 +42,31 @@ namespace absolute2048
         {
             if (e.Key == Key.Right)
             {
-				drawNewField();
+				currentField.moveRight();
+				drawFrame(gameGrid, currentField);
 			}
             if (e.Key == Key.Down)
             {
-				drawNewField();
+				currentField.moveDown();
+				drawFrame(gameGrid, currentField);
 			}
             if (e.Key == Key.Up)
             {
-				drawNewField();
+				currentField.moveUp();
+				drawFrame(gameGrid, currentField);
 			}
             if (e.Key == Key.Left)
             {
-				drawNewField();
+				currentField.moveLeft();
+				drawFrame(gameGrid, currentField);
 			}
             if (e.Key == Key.N)
             {
-                drawNewField();
+                iniNewField();
             }
         }
 
-        private void drawNewField()
+        private void iniNewField()
         {
             gameGrid.Children.Clear();
             double multiplier = Global.windowSizeModifier / (Global.widthX + Global.heightY);
@@ -70,10 +76,16 @@ namespace absolute2048
             gameGrid.Height = this.Height - 39;
             gameGrid.Width = this.Width - 16;
 
-            Field field = new Field();
-			drawLayout(gameGrid);
-			drawNumbers(gameGrid, field);
-        }
+            currentField = new Field();
+			drawFrame(gameGrid, currentField);
+		}
+
+		private void drawFrame(Grid grid, Field field)
+		{
+			grid.Children.Clear();
+			drawLayout(grid);
+			drawNumbers(grid, field);
+		}
 
         private void drawLayout(Grid grid)
         {
@@ -119,7 +131,7 @@ namespace absolute2048
 			}
 		}
 
-		private void drawNumber(Canvas canvas, Cell cell)
+		private void drawNumber(Canvas canvas, Cell cell)		// method needs to be adjusted for all lengths + coloured numbers
 		{
 			double cellHeight = gameGrid.Height / Global.heightY;
 			double cellWidth = gameGrid.Width / Global.widthX;
@@ -130,7 +142,7 @@ namespace absolute2048
 				Foreground = Global.lineColor,
 				Background = Global.backgroundColor,
 				BorderBrush = Global.backgroundColor,
-				FontSize = cellHeight / 2,
+				FontSize = cellHeight / 2,				// shit is here
 				Height = canvas.Height,
 				Width = canvas.Width,
 				VerticalContentAlignment = VerticalAlignment.Center,
@@ -141,8 +153,8 @@ namespace absolute2048
 			ini.Text = cell.label;
 			ini.FontWeight = FontWeights.Bold;
 			canvas.Children.Add(ini);
-			Canvas.SetLeft(ini, (cell.X - 1) * gameGrid.Width / Global.widthX + cellWidth / 4);
-			Canvas.SetTop(ini, (cell.Y - 1) * gameGrid.Height / Global.heightY + cellHeight / 4);
+			Canvas.SetLeft(ini, (cell.X - 1) * gameGrid.Width / Global.widthX + cellWidth / 3);		// total shit is here
+			Canvas.SetTop(ini, (cell.Y - 1) * gameGrid.Height / Global.heightY + cellHeight / 8); 
 		}
 
 		public static void drawCenteredText(Grid grid, Canvas canvas, string text)
@@ -157,8 +169,9 @@ namespace absolute2048
             TextBox ini = new TextBox()
             {
 				Foreground = Global.lineColor,
-				Background = canvas.Background,
-                FontSize = 15,
+				Background = Global.backgroundColor,
+				BorderBrush = Global.backgroundColor,
+				FontSize = 15,
                 Height = grid.Height,
                 Width = grid.Width,
                 VerticalContentAlignment = VerticalAlignment.Center,
