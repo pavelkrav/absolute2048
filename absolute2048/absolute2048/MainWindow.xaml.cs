@@ -5,8 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -136,6 +135,20 @@ namespace absolute2048
 			}
 		}
 
+		private void drawNumbers2(Grid grid, Field field)
+		{
+			grid.Children.Clear();
+			grid.Children.Add(fieldGrid);
+			fieldGrid.Columns = Global.widthX;
+			fieldGrid.Rows = Global.heightY;
+			fieldGrid.Children.Add(new Rectangle() { Fill = Brushes.Black });
+		}
+
+		private void drawNumber2(UniformGrid ugrid, Cell cell)
+		{
+
+		}
+
 		private void drawNumbers(Grid grid, Field field)
 		{
 			foreach (Cell c in field.cells)
@@ -153,12 +166,13 @@ namespace absolute2048
 			double cellWidth = gameGrid.Width / Global.widthX;
 
 			gameGrid.Children.Add(canvas);
+			double len = cell.label.Length > 2 ? cell.label.Length : 1;
 			TextBox ini = new TextBox()
 			{
 				Foreground = Global.lineColor,
 				Background = Global.backgroundColor,
 				BorderBrush = Global.backgroundColor,
-				FontSize = cellHeight / 2,				// shit is here
+				FontSize = cellHeight * Math.Pow(0.6, cell.label.Length),
 				Height = canvas.Height,
 				Width = canvas.Width,
 				VerticalContentAlignment = VerticalAlignment.Center,
@@ -169,8 +183,8 @@ namespace absolute2048
 			ini.Text = cell.label;
 			ini.FontWeight = FontWeights.Bold;
 			canvas.Children.Add(ini);
-			Canvas.SetLeft(ini, (cell.X - 1) * gameGrid.Width / Global.widthX + cellWidth / 3);		// total shit is here
-			Canvas.SetTop(ini, (cell.Y - 1) * gameGrid.Height / Global.heightY + cellHeight / 8); 
+			Canvas.SetLeft(ini, (cell.X - 1) * gameGrid.Width / Global.widthX + ini.FontSize * 0.3);
+			Canvas.SetTop(ini, (cell.Y - 1) * gameGrid.Height / Global.heightY + ini.FontSize * 0.15); 
 		}
 
 		public static void drawCenteredText(Grid grid, Canvas canvas, string text)

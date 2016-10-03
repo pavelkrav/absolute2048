@@ -10,6 +10,9 @@
         IsHitTestVisible="false"
         KeyDown="keyDown" >
     <Grid x:Name="gameGrid" >
-        
+        <UniformGrid x:Name="fieldGrid" >
+
+        </UniformGrid>
     </Grid>
+
 </Window>
