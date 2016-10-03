@@ -98,6 +98,7 @@ namespace absolute2048
 		private void drawFrame(Grid grid, Field field)
 		{
 			grid.Children.Clear();
+			//grid.Children.Remove(fieldGrid);
 			drawLayout(grid);
 			drawNumbers(grid, field);
 		}
@@ -135,56 +136,46 @@ namespace absolute2048
 			}
 		}
 
-		private void drawNumbers2(Grid grid, Field field)
-		{
-			grid.Children.Clear();
-			grid.Children.Add(fieldGrid);
-			fieldGrid.Columns = Global.widthX;
-			fieldGrid.Rows = Global.heightY;
-			fieldGrid.Children.Add(new Rectangle() { Fill = Brushes.Black });
-		}
-
-		private void drawNumber2(UniformGrid ugrid, Cell cell)
-		{
-
-		}
-
 		private void drawNumbers(Grid grid, Field field)
 		{
-			foreach (Cell c in field.cells)
+			grid.Children.Add(fieldGrid);
+			fieldGrid.Children.Clear();
+			fieldGrid.Background = null;
+			fieldGrid.Columns = Global.widthX;
+			fieldGrid.Rows = Global.heightY;
+
+			for (int i = 0; i < Global.heightY; i++)
 			{
-				if (c.value != 0)
+				for (int j = 0; j < Global.widthX; j++)
 				{
-					drawNumber(new Canvas(), c);
+					if (field.cells[j, i].value != 0)
+					{
+						drawNumber(field.cells[j, i]);
+					}
+					else
+					{
+						fieldGrid.Children.Add(new Canvas());
+					}
 				}
 			}
 		}
 
-		private void drawNumber(Canvas canvas, Cell cell)		// method needs to be adjusted for all lengths + coloured numbers
+		private void drawNumber(Cell cell)
 		{
-			double cellHeight = gameGrid.Height / Global.heightY;
-			double cellWidth = gameGrid.Width / Global.widthX;
-
-			gameGrid.Children.Add(canvas);
-			double len = cell.label.Length > 2 ? cell.label.Length : 1;
-			TextBox ini = new TextBox()
+			TextBox txt = new TextBox()
 			{
 				Foreground = Global.lineColor,
-				Background = Global.backgroundColor,
-				BorderBrush = Global.backgroundColor,
-				FontSize = cellHeight * Math.Pow(0.6, cell.label.Length),
-				Height = canvas.Height,
-				Width = canvas.Width,
+				Background = null,
+				BorderBrush = null,
+				FontSize = 32,
 				VerticalContentAlignment = VerticalAlignment.Center,
 				HorizontalContentAlignment = HorizontalAlignment.Center,
 				IsReadOnly = true,
 				Cursor = Cursors.None
 			};
-			ini.Text = cell.label;
-			ini.FontWeight = FontWeights.Bold;
-			canvas.Children.Add(ini);
-			Canvas.SetLeft(ini, (cell.X - 1) * gameGrid.Width / Global.widthX + ini.FontSize * 0.3);
-			Canvas.SetTop(ini, (cell.Y - 1) * gameGrid.Height / Global.heightY + ini.FontSize * 0.15); 
+			txt.Text = cell.label;
+			txt.FontWeight = FontWeights.Bold;
+			fieldGrid.Children.Add(txt);
 		}
 
 		public static void drawCenteredText(Grid grid, Canvas canvas, string text)
