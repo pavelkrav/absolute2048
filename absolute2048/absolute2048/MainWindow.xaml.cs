@@ -42,23 +42,39 @@ namespace absolute2048
         {
             if (e.Key == Key.Right)
             {
-				currentField.moveRight();
-				drawFrame(gameGrid, currentField);
+				try
+				{ 
+					currentField.moveRight();
+					drawFrame(gameGrid, currentField);
+				}
+				catch (System.NullReferenceException) {; }
 			}
             if (e.Key == Key.Down)
             {
-				currentField.moveDown();
-				drawFrame(gameGrid, currentField);
+				try
+				{
+					currentField.moveDown();
+					drawFrame(gameGrid, currentField);
+				}
+				catch (System.NullReferenceException) {; }
 			}
             if (e.Key == Key.Up)
             {
-				currentField.moveUp();
-				drawFrame(gameGrid, currentField);
+				try
+				{
+					currentField.moveUp();
+					drawFrame(gameGrid, currentField);
+				}
+				catch (System.NullReferenceException) {; }
 			}
             if (e.Key == Key.Left)
             {
-				currentField.moveLeft();
-				drawFrame(gameGrid, currentField);
+				try
+				{
+					currentField.moveLeft();
+					drawFrame(gameGrid, currentField);
+				}
+				catch (System.NullReferenceException) {; }
 			}
             if (e.Key == Key.N)
             {

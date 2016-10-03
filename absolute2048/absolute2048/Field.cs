@@ -6,87 +6,286 @@ using System.Threading.Tasks;
 
 namespace absolute2048
 {
-    class Field
-    {
-        public Cell[,] cells { get; set; } = new Cell[Global.widthX, Global.heightY];
+	class Field
+	{
+		public Cell[,] cells { get; set; } = new Cell[Global.widthX, Global.heightY];
 
-        public Field()
-        {
-            for (int i = 0; i < Global.widthX; i++)
-            {
-                for (int j = 0; j < Global.heightY; j++)
-                {
-                    cells[i, j] = new Cell(0);
+		public Field()
+		{
+			for (int i = 0; i < Global.widthX; i++)
+			{
+				for (int j = 0; j < Global.heightY; j++)
+				{
+					cells[i, j] = new Cell(0);
 					cells[i, j].X = i + 1;
 					cells[i, j].Y = j + 1;
 				}
-            }
-                
-            spawn();
-        }
+			}
 
-        private void spawn()
-        {
-			Random rand = new Random(Guid.NewGuid().GetHashCode());
-            for (int i = 0; i < Global.spawnValue; i++)
-            {
-                int x = 0;
-                int y = 0;
-                do
-                {
-                    x = rand.Next(Global.widthX);
-                    y = rand.Next(Global.heightY);
-                }
-                while (cells[x, y].value != 0);
-                cells[x, y].value = Global.basisValue;
-            }
-        }
+			spawn();
+		}
 
-		public void moveUp()
+		private void spawn()
 		{
-			Cell[,] currentCells = cells;
-
-			for (int i = 0; i < Global.heightY; i++)
+			Random rand = new Random(Guid.NewGuid().GetHashCode());
+			for (int i = 0; i < Global.spawnValue; i++)
 			{
-				for (int j = 0; j < Global.widthX; j++)
+				int x = 0;
+				int y = 0;
+				do
 				{
-					try
+					x = rand.Next(Global.widthX);
+					y = rand.Next(Global.heightY);
+				}
+				while (cells[x, y].value != 0);
+				cells[x, y].value = Global.basisValue;
+			}
+		}
+
+		private int[] step(int[] line)
+		{
+			int len = line.Length;
+
+			if (line.Sum() == 0)
+				return line;
+			for (int i = 0; i < len - 1; i++)
+			{
+				// shift through empty cells
+				for (int j = 0; j < len; j++)
+				{
+					// empty-check
+					int sum = 0;
+					for (int rest = j; rest < len; rest++)
 					{
-						if (cells[j, i].value == cells[j, i + 1].value && cells[j, i].value != 0)
+						sum += line[rest];
+					}
+					if (sum == 0)
+						break;
+
+					// shift
+					while (line[j] == 0)
+					{
+						for (int n = j; n < len - 1; n++)
 						{
-							cells[j, i].value += cells[j, i + 1].value;
-							cells[j, i + 1].value = 0;							
-						}
-						if (cells[j, i].value == 0)
-						{
-							for (int k = i; k < Global.heightY; k++)
-							{
-								cells[j, k].value += cells[j, k + 1].value;
-								cells[j, k + 1].value = 0;
-							}
+							line[n] = line[n + 1];
+							line[n + 1] = 0;
 						}
 					}
-					catch (System.IndexOutOfRangeException) {; }
+				}
+
+				// addition
+				for (int j = 0; j < len - 1; j++)
+				{
+					if (line[j] == line[j + 1] && line[j] != 0)
+					{
+						line[j] += line[j + 1];
+						line[j + 1] = 0;
+					}
 				}
 			}
 
-			//if (currentCells != cells)
+			return line;
+		}
+
+		public void moveUp()
+		{
+			// saving state
+			int[,] preState = new int[Global.widthX, Global.heightY];
+			for (int i = 0; i < Global.widthX; i++)
+			{
+				for (int j = 0; j < Global.heightY; j++)
+				{
+					preState[i, j] = cells[i, j].value;
+				}
+			}
+
+			// step
+			for (int i = 0; i < Global.widthX; i++)
+			{
+				int[] temp = new int[Global.heightY];
+
+				for (int j = 0; j < Global.heightY; j++)
+				{
+					temp[j] = cells[i, j].value;
+				}
+
+				temp = step(temp);
+
+				for (int j = 0; j < Global.heightY; j++)
+				{
+					cells[i, j].value = temp[j];
+				}
+			}
+
+			// cheking state
+			bool spwn = false;
+			for (int i = 0; i < Global.widthX; i++)
+			{
+				for (int j = 0; j < Global.heightY; j++)
+				{
+					if (cells[i, j].value != preState[i, j])
+					{
+						spwn = true;
+						if (spwn)
+							break;
+					}
+				}
+				if (spwn)
+					break;
+			}
+			if (spwn)
 				spawn();
 		}
 
 		public void moveDown()
 		{
+			// saving state
+			int[,] preState = new int[Global.widthX, Global.heightY];
+			for (int i = 0; i < Global.widthX; i++)
+			{
+				for (int j = 0; j < Global.heightY; j++)
+				{
+					preState[i, j] = cells[i, j].value;
+				}
+			}
 
+			// step
+			for (int i = 0; i < Global.widthX; i++)
+			{
+				int[] temp = new int[Global.heightY];
+
+				for (int j = 0; j < Global.heightY; j++)
+				{
+					temp[j] = cells[i, Global.heightY - 1 - j].value;
+				}
+
+				temp = step(temp);
+
+				for (int j = 0; j < Global.heightY; j++)
+				{
+					cells[i, Global.heightY - 1 - j].value = temp[j];
+				}
+			}
+
+			// cheking state
+			bool spwn = false;
+			for (int i = 0; i < Global.widthX; i++)
+			{
+				for (int j = 0; j < Global.heightY; j++)
+				{
+					if (cells[i, j].value != preState[i, j])
+					{
+						spwn = true;
+						if (spwn)
+							break;
+					}
+				}
+				if (spwn)
+					break;
+			}
+			if (spwn)
+				spawn();
 		}
 
 		public void moveLeft()
 		{
+			// saving state
+			int[,] preState = new int[Global.widthX, Global.heightY];
+			for (int i = 0; i < Global.widthX; i++)
+			{
+				for (int j = 0; j < Global.heightY; j++)
+				{
+					preState[i, j] = cells[i, j].value;
+				}
+			}
 
+			// step
+			for (int i = 0; i < Global.heightY; i++)
+			{
+				int[] temp = new int[Global.widthX];
+
+				for (int j = 0; j < Global.widthX; j++)
+				{
+					temp[j] = cells[j, i].value;
+				}
+
+				temp = step(temp);
+
+				for (int j = 0; j < Global.widthX; j++)
+				{
+					cells[j, i].value = temp[j];
+				}
+			}
+
+			// cheking state
+			bool spwn = false;
+			for (int i = 0; i < Global.widthX; i++)
+			{
+				for (int j = 0; j < Global.heightY; j++)
+				{
+					if (cells[i, j].value != preState[i, j])
+					{
+						spwn = true;
+						if (spwn)
+							break;
+					}
+				}
+				if (spwn)
+					break;
+			}
+			if (spwn)
+				spawn();
 		}
 
 		public void moveRight()
 		{
+			// saving state
+			int[,] preState = new int[Global.widthX, Global.heightY];
+			for (int i = 0; i < Global.widthX; i++)
+			{
+				for (int j = 0; j < Global.heightY; j++)
+				{
+					preState[i, j] = cells[i, j].value;
+				}
+			}
 
+			// step
+			for (int i = 0; i < Global.heightY; i++)
+			{
+				int[] temp = new int[Global.widthX];
+
+				for (int j = 0; j < Global.widthX; j++)
+				{
+					temp[j] = cells[Global.widthX - 1 - j, i].value;
+				}
+
+				temp = step(temp);
+
+				for (int j = 0; j < Global.widthX; j++)
+				{
+					cells[Global.widthX - 1 - j, i].value = temp[j];
+				}
+			}
+
+			// cheking state
+			bool spwn = false;
+			for (int i = 0; i < Global.widthX; i++)
+			{
+				for (int j = 0; j < Global.heightY; j++)
+				{
+					if (cells[i, j].value != preState[i, j])
+					{
+						spwn = true;
+						if (spwn)
+							break;
+					}
+				}
+				if (spwn)
+					break;
+			}
+			if (spwn)
+				spawn();
 		}
     }
+
 }
