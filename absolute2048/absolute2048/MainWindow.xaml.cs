@@ -188,10 +188,12 @@ namespace absolute2048
 		/// </summary>
 		private void drawNumber(Cell cell)
 		{
+			Brush background = setBackground(cell.value);
+
 			TextBox txt = new TextBox()
 			{
 				Foreground = Global.lineColor,
-				Background = null,
+				Background = background,
 				BorderBrush = null,
 				FontSize = 32,
 				VerticalContentAlignment = VerticalAlignment.Center,
@@ -204,6 +206,38 @@ namespace absolute2048
 			//if (txt.Width > fieldGrid.Width / fieldGrid.Columns)		// does not work =(
 			//	txt.FontSize /= 2;
 			fieldGrid.Children.Add(txt);
+		}
+
+		private Brush setBackground(int value)
+		{
+			if (value != 0)
+			{
+				switch (value / Global.spawnValue)
+				{
+					case 1:
+						return Brushes.LightPink;
+
+					case 2:
+						return Brushes.Pink;
+
+					case 3:
+						return Brushes.DeepPink;
+
+					case 4:
+						return Brushes.Red;
+
+					case 5:
+						return Brushes.DarkRed;
+
+					case 6:
+						return Brushes.Violet;
+
+					default:
+						return Global.backgroundColor;
+				}
+			}
+			else
+				return Global.backgroundColor;
 		}
 
 		/// <summary>
