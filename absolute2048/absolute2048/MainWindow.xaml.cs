@@ -131,9 +131,9 @@ namespace absolute2048
 				currentLine.Y2 = grid.Height;
 				currentLine.Stroke = Global.lineColor;
 				if (i == 0 || i == Global.widthX)
-					currentLine.StrokeThickness = 3; // borders
+					currentLine.StrokeThickness = 2; // borders
 				else
-					currentLine.StrokeThickness = 2;
+					currentLine.StrokeThickness = 1;
 				grid.Children.Add(currentLine);
 			}
 
@@ -147,9 +147,9 @@ namespace absolute2048
 				currentLine.Y2 = grid.Height / Global.heightY * i;
 				currentLine.Stroke = Global.lineColor;
 				if (i == 0 || i == Global.heightY)
-					currentLine.StrokeThickness = 3; // borders
+					currentLine.StrokeThickness = 2; // borders
 				else
-					currentLine.StrokeThickness = 2;
+					currentLine.StrokeThickness = 1;
 				grid.Children.Add(currentLine);
 			}
 		}
@@ -208,36 +208,18 @@ namespace absolute2048
 			fieldGrid.Children.Add(txt);
 		}
 
+		/// <summary>
+		/// Set background color for cell
+		/// </summary>
+		/// <param name="value">Value of cell</param>
+		/// <returns>Brush for background</returns>
 		private Brush setBackground(int value)
 		{
-			if (value != 0)
-			{
-				switch (value / Global.spawnValue)
-				{
-					case 1:
-						return Brushes.LightPink;
-
-					case 2:
-						return Brushes.Pink;
-
-					case 3:
-						return Brushes.DeepPink;
-
-					case 4:
-						return Brushes.Red;
-
-					case 5:
-						return Brushes.DarkRed;
-
-					case 6:
-						return Brushes.Violet;
-
-					default:
-						return Global.backgroundColor;
-				}
-			}
-			else
-				return Global.backgroundColor;
+			int red = 255;
+			int green = 255 - (int)Math.Pow((double)value, 1 / (double)Global.basisValue) * 8;
+			int blue = 255 - (int)Math.Pow((double)value, 1 / (double)Global.basisValue) * 6;
+			var brush = new SolidColorBrush(Color.FromArgb(255, (byte)red, (byte)green, (byte)blue));
+			return brush;
 		}
 
 		/// <summary>
