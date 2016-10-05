@@ -6,6 +6,7 @@ namespace absolute2048
 	class Field
 	{
 		public Cell[,] cells { get; set; } = new Cell[Global.widthX, Global.heightY];
+		public int score { get { return getScore(); } }
 
 		public Field()
 		{
@@ -20,6 +21,27 @@ namespace absolute2048
 			}
 
 			spawn();
+		}		
+
+		private int getZeros()
+		{
+			int i = 0;
+			foreach (Cell c in cells)
+			{
+				if (c.value == 0)
+					i++;
+			}
+			return i;
+		}
+
+		private int getScore()
+		{
+			int score = 0;
+			foreach (Cell c in cells)
+			{
+				score += c.value;
+			}
+			return score;
 		}
 
 		private void spawn()
@@ -29,13 +51,24 @@ namespace absolute2048
 			{
 				int x = 0;
 				int y = 0;
-				do
+				if (getZeros() >= Global.spawnValue)
 				{
-					x = rand.Next(Global.widthX);
-					y = rand.Next(Global.heightY);
+					do
+					{
+						x = rand.Next(Global.widthX);
+						y = rand.Next(Global.heightY);
+					}
+					while (cells[x, y].value != 0);
+					cells[x, y].value = Global.basisValue;
 				}
-				while (cells[x, y].value != 0);
-				cells[x, y].value = Global.basisValue;
+				else
+				{
+					if (GameOver != null)
+					{
+						GameOverEventArgs e = new GameOverEventArgs(score);
+						GameOver(this, e);
+					}
+				}
 			}
 		}
 
@@ -75,7 +108,8 @@ namespace absolute2048
 				{
 					if (line[j] == line[j + 1] && line[j] != 0)
 					{
-						line[j] += line[j + 1];
+						//line[j] += line[j + 1];
+						line[j] *= Global.basisValue;
 						line[j + 1] = 0;
 					}
 				}
@@ -283,6 +317,17 @@ namespace absolute2048
 			if (spwn)
 				spawn();
 		}
-    }
+
+		public event EventHandler<GameOverEventArgs> GameOver;
+	}
+
+	public class GameOverEventArgs : EventArgs
+	{
+		public int score;
+		public GameOverEventArgs(int score)
+		{
+			this.score = score;
+		}
+	}
 
 }

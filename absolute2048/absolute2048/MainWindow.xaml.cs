@@ -17,6 +17,7 @@ namespace absolute2048
     public partial class MainWindow : Window
     {
 		private Field currentField;
+		private bool gameOver;
 
 		public MainWindow()
         {
@@ -28,6 +29,10 @@ namespace absolute2048
         {
             base.OnInitialized(e);
 
+			gameOver = false;
+
+			Global.backgroundColor = getBackground(0);
+
 			// window size determination
             double multiplier = Global.windowSizeModifier / (Global.widthX + Global.heightY);
             this.Width = Global.widthX * multiplier + 16.6;
@@ -37,8 +42,17 @@ namespace absolute2048
 			// grid size determination
             gameGrid.Height = this.Height - 39;
             gameGrid.Width = this.Width - 16;
-            drawCenteredText(gameGrid, new Canvas(), "Press N to start new game");
+
+			testCellColors();
+			drawSpecialText(gameGrid, new Canvas(), "Press N to start new game");
         }
+
+		private void OnGameOver(Object sender, GameOverEventArgs e)
+		{
+			drawCenteredText(gameGrid, new Canvas(), $"Game over. Your score {e.score}\n\nPress N to start new game");
+			gameOver = true;
+			currentField = null;
+		}
 
 		// on key down event
         private void keyDown(object sender, KeyEventArgs e)
@@ -48,7 +62,8 @@ namespace absolute2048
 				try
 				{ 
 					currentField.moveRight();
-					drawFrame(gameGrid, currentField);
+					if (!gameOver)
+						drawFrame(gameGrid, currentField);
 				}
 				catch (System.NullReferenceException) {; }
 			}
@@ -57,7 +72,8 @@ namespace absolute2048
 				try
 				{
 					currentField.moveDown();
-					drawFrame(gameGrid, currentField);
+					if (!gameOver)
+						drawFrame(gameGrid, currentField);
 				}
 				catch (System.NullReferenceException) {; }
 			}
@@ -66,7 +82,8 @@ namespace absolute2048
 				try
 				{
 					currentField.moveUp();
-					drawFrame(gameGrid, currentField);
+					if (!gameOver)
+						drawFrame(gameGrid, currentField);
 				}
 				catch (System.NullReferenceException) {; }
 			}
@@ -75,7 +92,8 @@ namespace absolute2048
 				try
 				{
 					currentField.moveLeft();
-					drawFrame(gameGrid, currentField);
+					if (!gameOver)
+						drawFrame(gameGrid, currentField);
 				}
 				catch (System.NullReferenceException) {; }
 			}
@@ -102,6 +120,9 @@ namespace absolute2048
 
 			// field initialization
             currentField = new Field();
+			gameOver = false;
+			currentField.GameOver += OnGameOver;
+
 			drawFrame(gameGrid, currentField);
 		}
 
@@ -112,8 +133,9 @@ namespace absolute2048
 		{
 			grid.Children.Clear();
 			//grid.Children.Remove(fieldGrid);		// leaks of RAM somewhere
-			drawLayout(grid);
 			drawNumbers(grid, field);
+			if (Global.enableLines)
+				drawLayout(grid);
 		}
 
 		/// <summary>
@@ -131,9 +153,9 @@ namespace absolute2048
 				currentLine.Y2 = grid.Height;
 				currentLine.Stroke = Global.lineColor;
 				if (i == 0 || i == Global.widthX)
-					currentLine.StrokeThickness = 2; // borders
+					currentLine.StrokeThickness = 3; // borders
 				else
-					currentLine.StrokeThickness = 1;
+					currentLine.StrokeThickness = 2;
 				grid.Children.Add(currentLine);
 			}
 
@@ -147,9 +169,9 @@ namespace absolute2048
 				currentLine.Y2 = grid.Height / Global.heightY * i;
 				currentLine.Stroke = Global.lineColor;
 				if (i == 0 || i == Global.heightY)
-					currentLine.StrokeThickness = 2; // borders
+					currentLine.StrokeThickness = 3; // borders
 				else
-					currentLine.StrokeThickness = 1;
+					currentLine.StrokeThickness = 2;
 				grid.Children.Add(currentLine);
 			}
 		}
@@ -188,7 +210,7 @@ namespace absolute2048
 		/// </summary>
 		private void drawNumber(Cell cell)
 		{
-			Brush background = setBackground(cell.value);
+			Brush background = getBackground(cell.value);
 
 			TextBox txt = new TextBox()
 			{
@@ -203,8 +225,8 @@ namespace absolute2048
 			};
 			txt.Text = cell.label;
 			txt.FontWeight = FontWeights.Bold;
-			//if (txt.Width > fieldGrid.Width / fieldGrid.Columns)		// does not work =(
-			//	txt.FontSize /= 2;
+			while (txt.FontSize * (txt.Text.Length - 1) > gameGrid.Width / Global.widthX)
+				txt.FontSize /= 1.2;
 			fieldGrid.Children.Add(txt);
 		}
 
@@ -213,19 +235,68 @@ namespace absolute2048
 		/// </summary>
 		/// <param name="value">Value of cell</param>
 		/// <returns>Brush for background</returns>
-		private Brush setBackground(int value)
+		private Brush getBackground(int value)
 		{
+			int i = 0;
+			while (value != 1 && value != 0)
+			{
+				value /= Global.basisValue;
+				i++;
+			}
+
+			int alpha = 255;
 			int red = 255;
-			int green = 255 - (int)Math.Pow((double)value, 1 / (double)Global.basisValue) * 8;
-			int blue = 255 - (int)Math.Pow((double)value, 1 / (double)Global.basisValue) * 6;
-			var brush = new SolidColorBrush(Color.FromArgb(255, (byte)red, (byte)green, (byte)blue));
+			int green = 255;
+			int blue = 255;
+
+			switch (Global.clrScheme)
+			{
+				case Global.colorScheme.coffee:
+					Global.lineColor = new SolidColorBrush(Color.FromArgb(255, 90, 55, 22));
+					alpha = 225;
+					if (i < 10)
+					{
+						red = 253 - i * 2;
+						green = 245 - i * 8;
+						blue = 230 - i * 12;
+					}
+					else
+					{
+						red = 240 - (i - 9) * 4;
+						green = 240 - (i - 9) * 30;
+						blue = 2 * i;
+					}
+					break;
+
+				case Global.colorScheme.sky:
+					Global.lineColor = new SolidColorBrush(Color.FromArgb(255, 44, 44, 66));
+					alpha = 255;
+					if (i < 10)
+					{
+						red = 210 - i * 10;
+						green = 245 - i * 10;
+						blue = 255;
+					}
+					else
+					{
+						red = 215 - (i - 9) * 15;
+						green = 160 - (i - 9) * 25;
+						blue = 200 - (i - 9) * 15;
+					}
+					break;
+
+				default :
+					break;
+			}
+
+			var brush = new SolidColorBrush(Color.FromArgb((byte)alpha, (byte)red, (byte)green, (byte)blue));
 			return brush;
 		}
 
 		/// <summary>
 		/// Draw centered unclickable message
 		/// </summary>
-		public static void drawCenteredText(Grid grid, Canvas canvas, string text)
+		private static void drawCenteredText(Grid grid, Canvas canvas, string text)
         {
             try
             {
@@ -237,9 +308,9 @@ namespace absolute2048
             TextBox ini = new TextBox()
             {
 				Foreground = Global.lineColor,
-				Background = Global.backgroundColor,
-				BorderBrush = Global.backgroundColor,
-				FontSize = 15,
+				Background = null,
+				BorderBrush = null,
+				FontSize = Global.windowSizeModifier / Global.widthX / 11,
                 Height = grid.Height,
                 Width = grid.Width,
                 VerticalContentAlignment = VerticalAlignment.Center,
@@ -251,5 +322,64 @@ namespace absolute2048
             ini.FontWeight = FontWeights.Bold;
             canvas.Children.Add(ini);
         }
+
+		private static void drawSpecialText(Grid grid, Canvas canvas, string text)
+		{
+			grid.Children.Add(canvas);
+
+			canvas.Children.Clear();
+			TextBox ini = new TextBox()
+			{
+				Foreground = Global.lineColor,
+				Background = null,
+				BorderBrush = null,
+				FontSize = Global.windowSizeModifier / Global.widthX / 11,
+				Height = grid.Height,
+				Width = grid.Width,
+				VerticalContentAlignment = VerticalAlignment.Center,
+				HorizontalContentAlignment = HorizontalAlignment.Center,
+				IsReadOnly = true,
+				Cursor = Cursors.None
+			};
+			ini.Text = text;
+			ini.FontWeight = FontWeights.Bold;
+			canvas.Children.Add(ini);
+		}
+
+		/// <summary>
+		/// Output available cells in order for color and font test
+		/// </summary>
+		private void testCellColors()
+		{
+			gameGrid.Children.Clear();
+			fieldGrid.Children.Clear();
+
+			gameGrid.Children.Add(fieldGrid);
+			for (int i = Global.widthX * Global.heightY - 1; i >= 1 ; i--)
+			{
+				int value = i == 0 ? 0 : (int)(Math.Pow(Global.basisValue, i));
+				Brush background = getBackground(value);
+
+				TextBox txt = new TextBox()
+				{
+					Foreground = Global.lineColor,
+					Background = background,
+					BorderBrush = null,
+					FontSize = Global.windowSizeModifier / Global.widthX / 6,
+					VerticalContentAlignment = VerticalAlignment.Center,
+					HorizontalContentAlignment = HorizontalAlignment.Center,
+					IsReadOnly = true,
+					Cursor = Cursors.None
+				};
+				txt.Text = value == 0 ? "" : value.ToString();
+				txt.FontWeight = FontWeights.Bold;
+				while (txt.FontSize * (txt.Text.Length - 1.8) > gameGrid.Width / Global.widthX)        
+					txt.FontSize /= 1.2;
+				fieldGrid.Children.Add(txt);
+			}
+
+			if (Global.enableLines)
+				drawLayout(gameGrid);
+		}
     }
 }
