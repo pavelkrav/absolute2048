@@ -50,6 +50,8 @@ namespace absolute2048
 
 		private void OnGameOver(Object sender, GameOverEventArgs e)
 		{
+			drawFrame(gameGrid, currentField);
+			Thread.Sleep(2500);
 			drawCenteredText(gameGrid, new Canvas(), $"Game over. Your score {e.score}\n\nPress N to start new game");
 			gameOver = true;
 			currentField = null;

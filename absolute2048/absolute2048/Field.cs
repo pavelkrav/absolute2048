@@ -44,15 +44,38 @@ namespace absolute2048
 			return score;
 		}
 
-		private void spawn()
+		private void fillAll()
 		{
-			Random rand = new Random(Guid.NewGuid().GetHashCode());
-			for (int i = 0; i < Global.spawnValue; i++)
+			for (int i = 0; i < Global.widthX; i++)
 			{
-				int x = 0;
-				int y = 0;
-				if (getZeros() >= Global.spawnValue)
+				for (int j = 0; j < Global.heightY; j++)
 				{
+					if (cells[i, j].value == 0)
+						cells[i, j].value = Global.basisValue;
+				}
+			}
+		}
+
+		private void consoleOutput()
+		{
+			for (int i = 0; i < Global.widthX; i++)
+			{
+				for (int j = 0; j < Global.heightY; j++)
+				{
+
+				}
+			}
+		}
+
+		private void spawn()
+		{			
+			if (getZeros() >= Global.spawnValue)
+			{
+				Random rand = new Random(Guid.NewGuid().GetHashCode());
+				for (int i = 0; i < Global.spawnValue; i++)
+				{
+					int x = 0;
+					int y = 0;
 					do
 					{
 						x = rand.Next(Global.widthX);
@@ -61,16 +84,18 @@ namespace absolute2048
 					while (cells[x, y].value != 0);
 					cells[x, y].value = Global.basisValue;
 				}
-				else
+			}
+			else
+			{
+				if (GameOver != null)
 				{
-					if (GameOver != null)
-					{
-						GameOverEventArgs e = new GameOverEventArgs(score);
-						GameOver(this, e);
-					}
+					fillAll();
+					GameOverEventArgs e = new GameOverEventArgs(score);
+					GameOver(this, e);
 				}
 			}
 		}
+
 
 		private int[] step(int[] line)
 		{
