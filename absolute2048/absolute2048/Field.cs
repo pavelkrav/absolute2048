@@ -46,24 +46,25 @@ namespace absolute2048
 
 		private void fillAll()
 		{
-			for (int i = 0; i < Global.widthX; i++)
+			for (int i = 0; i < Global.heightY; i++)
 			{
-				for (int j = 0; j < Global.heightY; j++)
+				for (int j = 0; j < Global.widthX; j++)
 				{
-					if (cells[i, j].value == 0)
-						cells[i, j].value = Global.basisValue;
+					if (cells[j, i].value == 0)
+						cells[j, i].value = Global.basisValue;
 				}
 			}
 		}
 
 		private void consoleOutput()
 		{
-			for (int i = 0; i < Global.widthX; i++)
+			for (int i = 0; i < Global.heightY; i++)
 			{
-				for (int j = 0; j < Global.heightY; j++)
+				for (int j = 0; j < Global.widthX; j++)
 				{
-
+					Console.Write($"{cells[j, i].value} ");
 				}
+				Console.Write("\n");
 			}
 		}
 
@@ -90,6 +91,7 @@ namespace absolute2048
 				if (GameOver != null)
 				{
 					fillAll();
+					//consoleOutput();
 					GameOverEventArgs e = new GameOverEventArgs(score);
 					GameOver(this, e);
 				}
@@ -133,7 +135,6 @@ namespace absolute2048
 				{
 					if (line[j] == line[j + 1] && line[j] != 0)
 					{
-						//line[j] += line[j + 1];
 						line[j] *= Global.basisValue;
 						line[j + 1] = 0;
 					}

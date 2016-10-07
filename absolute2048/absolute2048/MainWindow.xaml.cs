@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Media.Animation;
 
 namespace absolute2048
 {
@@ -32,6 +33,10 @@ namespace absolute2048
 
 			gameOver = false;
 
+			fieldGrid.Background = null;
+			fieldGrid.Columns = Global.widthX;
+			fieldGrid.Rows = Global.heightY;
+
 			Global.backgroundColor = getBackground(0);
 
 			// window size determination
@@ -43,6 +48,8 @@ namespace absolute2048
 			// grid size determination
             gameGrid.Height = this.Height - 39;
             gameGrid.Width = this.Width - 16;
+			fieldGrid.Height = gameGrid.Height;
+			fieldGrid.Width = gameGrid.Width;
 
 			testCellColors();
 			drawSpecialText(gameGrid, new Canvas(), "Press N to start new game");
@@ -51,10 +58,18 @@ namespace absolute2048
 		private void OnGameOver(Object sender, GameOverEventArgs e)
 		{
 			drawFrame(gameGrid, currentField);
-			Thread.Sleep(2500);
-			drawCenteredText(gameGrid, new Canvas(), $"Game over. Your score {e.score}\n\nPress N to start new game");
+			//Thread.Sleep(2500);
+			//drawCenteredText(gameGrid, new Canvas(), $"Game over. Your score {e.score}\n\nPress N to start new game");
 			gameOver = true;
 			currentField = null;
+		}
+
+		private void gameOverAnimation(GameOverEventArgs e)
+		{
+			DoubleAnimation goAnimation = new DoubleAnimation() { Duration = TimeSpan.FromSeconds(2.5) };
+			//goAnimation.From = ;
+			//goAnimation.To = ;
+			//fieldGrid.BeginAnimation(Background, goAnimation);
 		}
 
 		// on key down event
@@ -80,8 +95,8 @@ namespace absolute2048
 				}
 				catch (System.NullReferenceException) {; }
 			}
-            if (e.Key == Key.Up)
-            {
+			if (e.Key == Key.Up)
+			{
 				try
 				{
 					currentField.moveUp();
@@ -90,8 +105,8 @@ namespace absolute2048
 				}
 				catch (System.NullReferenceException) {; }
 			}
-            if (e.Key == Key.Left)
-            {
+			if (e.Key == Key.Left)
+			{
 				try
 				{
 					currentField.moveLeft();
@@ -113,6 +128,7 @@ namespace absolute2048
         {
 			// window size determination
 			gameGrid.Children.Clear();
+			fieldGrid.Children.Clear();
             double multiplier = Global.windowSizeModifier / (Global.widthX + Global.heightY);
             this.Width = Global.widthX * multiplier + 16.6;
             this.Height = Global.heightY * multiplier + 39.6;
@@ -120,9 +136,11 @@ namespace absolute2048
 			// grid size determination
 			gameGrid.Height = this.Height - 39;
             gameGrid.Width = this.Width - 16;
+			fieldGrid.Height = gameGrid.Height;
+			fieldGrid.Width = gameGrid.Width;
 
 			// field initialization
-            currentField = new Field();
+			currentField = new Field();
 			gameOver = false;
 			currentField.GameOver += OnGameOver;
 
@@ -187,9 +205,6 @@ namespace absolute2048
 			// adding UniformGrid
 			grid.Children.Add(fieldGrid);
 			fieldGrid.Children.Clear();
-			fieldGrid.Background = null;
-			fieldGrid.Columns = Global.widthX;
-			fieldGrid.Rows = Global.heightY;
 
 			// filling cells
 			for (int i = 0; i < Global.heightY; i++)
