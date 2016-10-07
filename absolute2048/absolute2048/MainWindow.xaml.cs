@@ -274,6 +274,14 @@ namespace absolute2048
 			while (txt.FontSize * (txt.Text.Length - 1) > gameGrid.Width / Global.widthX)
 				txt.FontSize /= 1.2;
 			fieldGrid.Children.Add(txt);
+			
+			if (cell.value == Global.basisValue)
+			{
+				DoubleAnimation appearence = new DoubleAnimation() { Duration = TimeSpan.FromSeconds(0.2) };
+				appearence.From = 0.0;
+				appearence.To = 1.0;
+				fieldGrid.BeginAnimation(OpacityProperty, appearence);
+			}
 		}
 
 		/// <summary>
