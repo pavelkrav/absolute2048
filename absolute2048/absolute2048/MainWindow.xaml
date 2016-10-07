@@ -13,6 +13,9 @@
         <UniformGrid x:Name="fieldGrid" >
 
         </UniformGrid>
+        <UniformGrid x:Name="newCellsGrid">
+            
+        </UniformGrid>
     </Grid>
 
 </Window>

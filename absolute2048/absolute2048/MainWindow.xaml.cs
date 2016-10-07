@@ -58,18 +58,40 @@ namespace absolute2048
 		private void OnGameOver(Object sender, GameOverEventArgs e)
 		{
 			drawFrame(gameGrid, currentField);
-			//Thread.Sleep(2500);
-			//drawCenteredText(gameGrid, new Canvas(), $"Game over. Your score {e.score}\n\nPress N to start new game");
+			gameOverAnimation(e);
 			gameOver = true;
 			currentField = null;
 		}
 
 		private void gameOverAnimation(GameOverEventArgs e)
 		{
-			DoubleAnimation goAnimation = new DoubleAnimation() { Duration = TimeSpan.FromSeconds(2.5) };
-			//goAnimation.From = ;
-			//goAnimation.To = ;
-			//fieldGrid.BeginAnimation(Background, goAnimation);
+			DoubleAnimation goAnimation = new DoubleAnimation() { Duration = TimeSpan.FromSeconds(4.0) };
+			goAnimation.From = 1.0;
+			goAnimation.To = 0.0;
+			fieldGrid.BeginAnimation(OpacityProperty, goAnimation);
+
+			TextBox ini = new TextBox()
+			{
+				Foreground = Global.lineColor,
+				Background = null,
+				BorderBrush = null,
+				FontSize = Global.windowSizeModifier / Global.widthX / 11,
+				Height = gameGrid.Height,
+				Width = gameGrid.Width,
+				VerticalContentAlignment = VerticalAlignment.Center,
+				HorizontalContentAlignment = HorizontalAlignment.Center,
+				IsReadOnly = true,
+				Cursor = Cursors.None
+			};
+			ini.Text = $"Game over. Your score {e.score}\n\nPress N to start new game";
+			ini.FontWeight = FontWeights.Bold;
+			gameGrid.Children.Add(ini);
+
+			//DoubleAnimation goAnimation2 = new DoubleAnimation() { Duration = TimeSpan.FromSeconds(4.0) };
+			//goAnimation.From = 0.0;
+			//goAnimation.To = 1.0;
+			//gameGrid.BeginAnimation(OpacityProperty, goAnimation2);
+
 		}
 
 		// on key down event
@@ -117,7 +139,7 @@ namespace absolute2048
 			}
             if (e.Key == Key.N)
             {
-                iniNewField();
+				iniNewField();
             }
         }
 
@@ -129,7 +151,13 @@ namespace absolute2048
 			// window size determination
 			gameGrid.Children.Clear();
 			fieldGrid.Children.Clear();
-            double multiplier = Global.windowSizeModifier / (Global.widthX + Global.heightY);
+
+			DoubleAnimation appearence = new DoubleAnimation() { Duration = TimeSpan.FromSeconds(0.2) };
+			appearence.From = 0.0;
+			appearence.To = 1.0;
+			fieldGrid.BeginAnimation(OpacityProperty, appearence);
+
+			double multiplier = Global.windowSizeModifier / (Global.widthX + Global.heightY);
             this.Width = Global.widthX * multiplier + 16.6;
             this.Height = Global.heightY * multiplier + 39.6;
 
@@ -398,6 +426,7 @@ namespace absolute2048
 
 			if (Global.enableLines)
 				drawLayout(gameGrid);
+
 		}
     }
 }
