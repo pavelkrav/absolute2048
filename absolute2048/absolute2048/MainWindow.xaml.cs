@@ -37,6 +37,10 @@ namespace absolute2048
 			fieldGrid.Columns = Global.widthX;
 			fieldGrid.Rows = Global.heightY;
 
+			newCellsGrid.Background = null;
+			newCellsGrid.Columns = Global.widthX;
+			newCellsGrid.Rows = Global.heightY;
+
 			Global.backgroundColor = getBackground(0);
 
 			// window size determination
@@ -50,6 +54,8 @@ namespace absolute2048
             gameGrid.Width = this.Width - 16;
 			fieldGrid.Height = gameGrid.Height;
 			fieldGrid.Width = gameGrid.Width;
+			newCellsGrid.Height = gameGrid.Height;
+			newCellsGrid.Width = gameGrid.Width;
 
 			testCellColors();
 			drawSpecialText(gameGrid, new Canvas(), "Press N to start new game");
@@ -65,12 +71,13 @@ namespace absolute2048
 
 		private void gameOverAnimation(GameOverEventArgs e)
 		{
-			DoubleAnimation goAnimation = new DoubleAnimation() { Duration = TimeSpan.FromSeconds(4.0) };
+			DoubleAnimation goAnimation = new DoubleAnimation() { Duration = TimeSpan.FromSeconds(4.0 * Global.animationSpeed / 15) };
 			goAnimation.From = 1.0;
 			goAnimation.To = 0.0;
 			fieldGrid.BeginAnimation(OpacityProperty, goAnimation);
+			newCellsGrid.BeginAnimation(OpacityProperty, goAnimation);
 
-			TextBox ini = new TextBox()
+			TextBox txt = new TextBox()
 			{
 				Foreground = Global.lineColor,
 				Background = null,
@@ -83,15 +90,9 @@ namespace absolute2048
 				IsReadOnly = true,
 				Cursor = Cursors.None
 			};
-			ini.Text = $"Game over. Your score {e.score}\n\nPress N to start new game";
-			ini.FontWeight = FontWeights.Bold;
-			gameGrid.Children.Add(ini);
-
-			//DoubleAnimation goAnimation2 = new DoubleAnimation() { Duration = TimeSpan.FromSeconds(4.0) };
-			//goAnimation.From = 0.0;
-			//goAnimation.To = 1.0;
-			//gameGrid.BeginAnimation(OpacityProperty, goAnimation2);
-
+			txt.Text = $"Game over. Your score {e.score}\n\nPress N to start new game";
+			txt.FontWeight = FontWeights.Bold;
+			gameGrid.Children.Add(txt);
 		}
 
 		// on key down event
@@ -151,11 +152,7 @@ namespace absolute2048
 			// window size determination
 			gameGrid.Children.Clear();
 			fieldGrid.Children.Clear();
-
-			DoubleAnimation appearence = new DoubleAnimation() { Duration = TimeSpan.FromSeconds(0.2) };
-			appearence.From = 0.0;
-			appearence.To = 1.0;
-			fieldGrid.BeginAnimation(OpacityProperty, appearence);
+			newCellsGrid.Children.Clear();
 
 			double multiplier = Global.windowSizeModifier / (Global.widthX + Global.heightY);
             this.Width = Global.widthX * multiplier + 16.6;
@@ -166,11 +163,18 @@ namespace absolute2048
             gameGrid.Width = this.Width - 16;
 			fieldGrid.Height = gameGrid.Height;
 			fieldGrid.Width = gameGrid.Width;
+			newCellsGrid.Height = gameGrid.Height;
+			newCellsGrid.Width = gameGrid.Width;
 
 			// field initialization
 			currentField = new Field();
 			gameOver = false;
 			currentField.GameOver += OnGameOver;
+
+			DoubleAnimation appearence = new DoubleAnimation() { Duration = TimeSpan.FromSeconds(0.05) };
+			appearence.From = 0.0;
+			appearence.To = 1.0;
+			fieldGrid.BeginAnimation(OpacityProperty, appearence);
 
 			drawFrame(gameGrid, currentField);
 		}
@@ -185,6 +189,11 @@ namespace absolute2048
 			drawNumbers(grid, field);
 			if (Global.enableLines)
 				drawLayout(grid);
+
+			DoubleAnimation appearence = new DoubleAnimation() { Duration = TimeSpan.FromSeconds(0.01 * Global.animationSpeed) };
+			appearence.From = 0.0;
+			appearence.To = 1.0;
+			newCellsGrid.BeginAnimation(OpacityProperty, appearence);
 		}
 
 		/// <summary>
@@ -232,7 +241,9 @@ namespace absolute2048
 		{
 			// adding UniformGrid
 			grid.Children.Add(fieldGrid);
+			grid.Children.Add(newCellsGrid);
 			fieldGrid.Children.Clear();
+			newCellsGrid.Children.Clear();
 
 			// filling cells
 			for (int i = 0; i < Global.heightY; i++)
@@ -246,6 +257,7 @@ namespace absolute2048
 					else
 					{
 						fieldGrid.Children.Add(new Canvas());
+						newCellsGrid.Children.Add(new Canvas());
 					}
 				}
 			}
@@ -273,14 +285,15 @@ namespace absolute2048
 			txt.FontWeight = FontWeights.Bold;
 			while (txt.FontSize * (txt.Text.Length - 1) > gameGrid.Width / Global.widthX)
 				txt.FontSize /= 1.2;
-			fieldGrid.Children.Add(txt);
-			
-			if (cell.value == Global.basisValue)
+			if (cell.isNew)
 			{
-				DoubleAnimation appearence = new DoubleAnimation() { Duration = TimeSpan.FromSeconds(0.2) };
-				appearence.From = 0.0;
-				appearence.To = 1.0;
-				fieldGrid.BeginAnimation(OpacityProperty, appearence);
+				fieldGrid.Children.Add(new Canvas());
+				newCellsGrid.Children.Add(txt);
+			}
+			else
+			{
+				fieldGrid.Children.Add(txt);
+				newCellsGrid.Children.Add(new Canvas());
 			}
 		}
 
@@ -434,7 +447,6 @@ namespace absolute2048
 
 			if (Global.enableLines)
 				drawLayout(gameGrid);
-
 		}
     }
 }

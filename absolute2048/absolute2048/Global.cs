@@ -20,5 +20,7 @@ namespace absolute2048
 		static public Brush lineColor { get; set; } = Brushes.Black;
 		static public bool enableLines { get; set; } = false;
 		static public colorScheme clrScheme { get; set; } = colorScheme.coffee;
+
+		static public int animationSpeed { get; set; } = 15;
     }
 }

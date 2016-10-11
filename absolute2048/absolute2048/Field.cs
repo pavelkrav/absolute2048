@@ -17,6 +17,7 @@ namespace absolute2048
 					cells[i, j] = new Cell(0);
 					cells[i, j].X = i + 1;
 					cells[i, j].Y = j + 1;
+					cells[i, j].isNew = false;
 				}
 			}
 
@@ -51,7 +52,21 @@ namespace absolute2048
 				for (int j = 0; j < Global.widthX; j++)
 				{
 					if (cells[j, i].value == 0)
+					{
 						cells[j, i].value = Global.basisValue;
+						cells[j, i].isNew = true;
+					}
+				}
+			}
+		}
+
+		private void makeThemOld()
+		{
+			for (int i = 0; i < Global.heightY; i++)
+			{
+				for (int j = 0; j < Global.widthX; j++)
+				{
+					cells[j, i].isNew = false;
 				}
 			}
 		}
@@ -69,7 +84,8 @@ namespace absolute2048
 		}
 
 		private void spawn()
-		{			
+		{
+			makeThemOld();
 			if (getZeros() >= Global.spawnValue)
 			{
 				Random rand = new Random(Guid.NewGuid().GetHashCode());
@@ -84,6 +100,7 @@ namespace absolute2048
 					}
 					while (cells[x, y].value != 0);
 					cells[x, y].value = Global.basisValue;
+					cells[x, y].isNew = true;
 				}
 			}
 			else
@@ -192,6 +209,8 @@ namespace absolute2048
 			}
 			if (spwn)
 				spawn();
+			else
+				makeThemOld();
 		}
 
 		public void moveDown()
@@ -242,6 +261,8 @@ namespace absolute2048
 			}
 			if (spwn)
 				spawn();
+			else
+				makeThemOld();
 		}
 
 		public void moveLeft()
@@ -292,6 +313,8 @@ namespace absolute2048
 			}
 			if (spwn)
 				spawn();
+			else
+				makeThemOld();
 		}
 
 		public void moveRight()
@@ -342,6 +365,8 @@ namespace absolute2048
 			}
 			if (spwn)
 				spawn();
+			else
+				makeThemOld();
 		}
 
 		public event EventHandler<GameOverEventArgs> GameOver;
